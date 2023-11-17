@@ -1,19 +1,28 @@
 package main
 
 import (
+	"github.com/AbdulrahmanDaud10/notes-go-fiber-rest-api/database"
+	"github.com/AbdulrahmanDaud10/notes-go-fiber-rest-api/route"
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/cors"
+	"github.com/gofiber/fiber/v2/middleware/logger"
+	_ "github.com/lib/pq"
 )
 
 func main() {
-	// Start a new fiber app
-	app := fiber.New()
+	
+	database.Connect()
 
-	// Send a string back for GET calls to the endpoint "/"
-	app.Get("/", func(c *fiber.Ctx) error {
-		err := c.SendString("And the API is UP!")
-		return err
+	app := fiber.New()
+	app.Use(logger.New())
+	app.Use(cors.New())
+
+	route.SetupRoutes(app)
+
+	// handle unavailable route
+	app.Use(func(c *fiber.Ctx) error {
+		return c.SendStatus(404) // => 404 "Not Found"
 	})
 
-	// Listen on PORT 300
 	app.Listen(":3000")
 }
